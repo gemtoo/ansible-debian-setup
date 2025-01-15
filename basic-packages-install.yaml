@@ -1,0 +1,197 @@
+---
+- name: Ensure logging in has no welcome message
+  file:
+    path: /root/.hushlogin
+    state: touch
+  tags:
+    - pkgs
+
+- name: Make sure /etc/issue is quiet
+  copy:
+    content: ""
+    dest: /etc/issue
+  tags:
+    - pkgs
+
+- name: Check if /etc/apt/mirrors folder exists
+  stat:
+    path: /etc/apt/mirrors
+  register: mirrors
+  tags:
+    - pkgs
+    - by
+
+- name: Create /etc/apt/mirrors folder
+  file:
+    path: /etc/apt/mirrors
+    state: directory
+    mode: '0755'
+    owner: "root"
+    group: "root"
+  when: not mirrors.stat.exists
+  tags:
+    - pkgs
+    - by
+
+- name: Make sure sources.list is empty
+  copy:
+    content: ""
+    dest: /etc/apt/sources.list
+  tags:
+    - pkgs
+    - by
+
+- name: Use proper Debian sources file
+  template:
+    src: debian.sources
+    dest: /etc/apt/sources.list.d/debian.sources
+  tags:
+    - pkgs
+    - by
+
+- name: Use BY mirror for Debian repo
+  template:
+    src: debian.list
+    dest: /etc/apt/mirrors/debian.list
+  tags:
+    - pkgs
+    - by
+
+- name: Use BY mirror for Debian security repo
+  template:
+    src: debian-security.list
+    dest: /etc/apt/mirrors/debian-security.list
+  tags:
+    - pkgs
+    - by
+
+- name: Update APT cache and upgrade all packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+  tags:
+    - pkgs
+
+- name: Install essential system administration packages
+  apt:
+    pkg:
+      - htop
+      - curl
+      - rsync
+      - tmux
+      - traceroute
+      - wget
+      - net-tools
+      - ufw
+      - tree
+      - ncdu
+      - plocate
+      - neofetch
+      - python3-passlib
+      - telnet
+      - exa
+      - cron
+      - bmon
+    state: latest
+  tags:
+    - pkgs
+
+- name: Create clear -> c symlink
+  ansible.builtin.file:
+    src: /usr/bin/clear
+    dest: /usr/bin/c
+    state: link
+  tags:
+    - pkgs
+
+- name: Check if Micro text editor is already installed
+  stat:
+    path: /usr/bin/t
+  register: micro
+  tags:
+    - pkgs
+
+- name: Download Micro text editor
+  shell: curl https://getmic.ro | sh
+  when: not micro.stat.exists
+  tags:
+    - pkgs
+
+- name: Install Micro to /usr/bin/t
+  command: mv micro /usr/bin/t
+  when: not micro.stat.exists
+  tags:
+    - pkgs
+
+- name: Ensure Micro's config directory exists for user root
+  file:
+    path: /root/.config/micro
+    state: directory
+    mode: '0755'
+    owner: "root"
+    group: "root"
+  when: not micro.stat.exists
+  tags:
+    - pkgs
+
+- name: Configure Micro
+  template:
+    src: ./micro-settings.json
+    dest: /root/.config/micro/settings.json
+  when: not micro.stat.exists
+  tags:
+    - pkgs
+
+- name: Ensure VISUAL environment variable is set
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    state: present
+    regexp: '^export VISUAL='
+    line: 'export VISUAL=t'
+  tags:
+    - pkgs
+
+- name: Ensure EDITOR environment variable is set
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    state: present
+    regexp: '^export EDITOR='
+    line: 'export EDITOR=t'
+  tags:
+    - pkgs
+
+- name: Ensure 'htop' shortcut is in .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    state: present
+    regexp: '^alias htop='
+    line: 'alias htop="htop -d 1 -t"'
+  tags:
+    - pkgs
+
+- name: Ensure 'l' shortcut is in .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    state: present
+    regexp: '^alias l='
+    line: 'alias l="exa -hla --octal-permissions"'
+  tags:
+    - pkgs
+
+- name: Ensure 'll' shortcut is in .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    state: present
+    regexp: '^alias ll='
+    line: 'alias ll="exa -hla --octal-permissions"'
+  tags:
+    - pkgs
+
+- name: Ensure 'q' shortcut is in .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    state: present
+    regexp: '^alias q='
+    line: 'alias q="exit"'
+  tags:
+    - pkgs

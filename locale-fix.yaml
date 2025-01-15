@@ -1,0 +1,25 @@
+---
+- name: Ensure correct locales are used in /etc/environment
+  ansible.builtin.blockinfile:
+    path: /etc/environment
+    state: present
+    block: |
+      LANG=en_US.UTF-8
+      LC_ALL=en_US.UTF-8
+  tags:
+    - locales
+
+- name: Ensure correct locales are uncommented in /etc/locale.gen
+  ansible.builtin.blockinfile:
+    path: /etc/locale.gen
+    state: present
+    block: |
+       en_US.UTF-8 UTF-8
+       C.UTF-8 UTF-8
+  tags:
+    - locales
+
+- name: Regenerate locales
+  command: locale-gen
+  tags:
+    - locales

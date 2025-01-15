@@ -1,0 +1,54 @@
+---
+- name: Debian machine setup
+  hosts: debian_setup
+  become: yes
+
+  tasks:
+  - name: Fix locales sub-playbook
+    include_tasks: locale-fix.yaml
+    tags:
+      - locales
+
+  - name: Basic packages installation sub-playbook
+    include_tasks: basic-packages-install.yaml
+    tags:
+      - pkgs
+
+  - name: VM packages installation sub-playbook
+    include_tasks: vm-packages-install.yaml
+    tags:
+      - vm
+
+  - name: Server hardening sub-playbook
+    include_tasks: server-hardening.yaml
+
+  - name: Docker + Docker Compose installation sub-playbook
+    include_tasks: docker-install.yaml
+    tags:
+      - docker
+
+  - name: Jenkins Agent installation sub-playbook
+    include_tasks: jenkins-install.yaml
+    tags:
+      - jenkins
+
+  - name: Reboot
+    ansible.builtin.reboot:
+    tags:
+      - reboot
+
+  - name: Disable password for user 'root'
+    ansible.builtin.user:
+      name: root
+      password_lock: yes
+      password: '!'
+    tags:
+      - nopwd
+
+  - name: Disable password for user 'user'
+    ansible.builtin.user:
+      name: root
+      password_lock: yes
+      password: '!'
+    tags:
+      - nopwd

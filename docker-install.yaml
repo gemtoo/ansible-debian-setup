@@ -1,0 +1,71 @@
+---
+- name: Prepare to add a repository sub-playbook
+  include_tasks: ppa-prepare.yaml
+  tags:
+    - docker
+
+- name: Add Docker’s official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    keyring: /etc/apt/keyrings/docker-apt-keyring.gpg
+    state: present
+  tags:
+    - docker
+
+- name: Set up the stable Docker repository
+  apt_repository:
+    repo: deb [signed-by=/etc/apt/keyrings/docker-apt-keyring.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+    filename: docker
+    state: present
+  tags:
+    - docker
+
+- name: Make sure unofficial Docker components are uninstalled
+  apt:
+    pkg:
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+  tags:
+    - docker
+
+- name: Install Docker Engine components and plugins
+  apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: latest
+    update_cache: yes
+  tags:
+    - docker
+
+- name: Ensure Docker service is running
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  tags:
+    - docker
+
+- name: Ensure 'dc' shortcut is in .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    state: present
+    line: 'alias dc="docker compose"'
+  tags:
+    - docker
+
+- name: Ensure 'dsp' shortcut is in .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    state: present
+    line: 'alias dsp="docker system prune -af && docker network prune -f && docker volume prune -f"'
+  tags:
+    - docker
