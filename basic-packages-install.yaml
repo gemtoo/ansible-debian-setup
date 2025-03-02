@@ -92,6 +92,7 @@
       - exa
       - cron
       - bmon
+      - jq
     state: latest
   tags:
     - pkgs
