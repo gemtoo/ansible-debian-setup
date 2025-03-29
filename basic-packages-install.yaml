@@ -69,6 +69,8 @@
   apt:
     update_cache: yes
     upgrade: dist
+    autoclean: yes
+    clean: yes
   tags:
     - pkgs
 
@@ -93,7 +95,11 @@
       - cron
       - bmon
       - jq
+      - xclip
+      - xsel
     state: latest
+    autoclean: yes
+    clean: yes
   tags:
     - pkgs
 
@@ -111,18 +117,21 @@
   register: micro
   tags:
     - pkgs
+    - micro
 
 - name: Download Micro text editor
   shell: curl https://getmic.ro | sh
   when: not micro.stat.exists
   tags:
     - pkgs
+    - micro
 
 - name: Install Micro to /usr/bin/t
   command: mv micro /usr/bin/t
   when: not micro.stat.exists
   tags:
     - pkgs
+    - micro
 
 - name: Ensure Micro's config directory exists for user root
   file:
@@ -134,6 +143,7 @@
   when: not micro.stat.exists
   tags:
     - pkgs
+    - micro
 
 - name: Configure Micro
   template:
@@ -142,6 +152,7 @@
   when: not micro.stat.exists
   tags:
     - pkgs
+    - micro
 
 - name: Ensure VISUAL environment variable is set
   ansible.builtin.lineinfile:

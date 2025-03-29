@@ -19,17 +19,3 @@
     state: started
   tags:
     - vm
-
-- name: Set GRUB_TIMEOUT=1 for faster boot process
-  lineinfile:
-    path: /etc/default/grub
-    regexp: '^GRUB_TIMEOUT='
-    line: 'GRUB_TIMEOUT=1'
-    state: present
-  tags:
-    - vm
-
-- name: Update GRUB configuration
-  command: update-grub
-  tags:
-    - vm

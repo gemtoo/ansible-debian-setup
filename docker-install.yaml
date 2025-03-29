@@ -43,6 +43,8 @@
       - docker-compose-plugin
     state: latest
     update_cache: yes
+    autoclean: yes
+    clean: yes
   tags:
     - docker
 
