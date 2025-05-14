@@ -1,6 +1,7 @@
 ---
 - name: Debian machine setup
   hosts: debian_setup
+  gather_facts: yes
   become: yes
   become_method: su
 
