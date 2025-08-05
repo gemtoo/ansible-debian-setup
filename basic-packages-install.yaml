@@ -105,6 +105,12 @@
   tags:
     - pkgs
 
+- name: Purge residual configs and remove unused dependencies system-wide
+  ansible.builtin.apt:
+    autoremove: yes
+    purge: yes
+  tags:
+    - pkgs
 
 - name: "Neutralize the most useless(TM) systemd-networkd-wait-online.service"
   ansible.builtin.systemd:
@@ -112,6 +118,8 @@
     state: stopped
     enabled: no
     masked: yes
+  tags:
+    - pkgs
 
 - name: Create clear -> c symlink
   ansible.builtin.file:

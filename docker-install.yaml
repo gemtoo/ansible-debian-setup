@@ -1,25 +1,4 @@
 ---
-- name: Prepare to add a repository sub-playbook
-  include_tasks: ppa-prepare.yaml
-  tags:
-    - docker
-
-- name: Add Docker’s official GPG key
-  apt_key:
-    url: https://download.docker.com/linux/debian/gpg
-    keyring: /etc/apt/keyrings/docker-apt-keyring.gpg
-    state: present
-  tags:
-    - docker
-
-- name: Set up the stable Docker repository
-  apt_repository:
-    repo: deb [signed-by=/etc/apt/keyrings/docker-apt-keyring.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
-    filename: docker
-    state: present
-  tags:
-    - docker
-
 - name: Make sure unofficial Docker components are uninstalled
   apt:
     pkg:
@@ -33,25 +12,25 @@
   tags:
     - docker
 
-- name: Install Docker Engine components and plugins
-  apt:
-    pkg:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-    state: latest
-    update_cache: yes
-    autoclean: yes
-    clean: yes
+- name: Install Docker via convenience script
+  shell: |
+    curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+    sh /tmp/get-docker.sh
+  args:
+    executable: /bin/bash
   tags:
     - docker
 
-- name: Ensure Docker service is running
+- name: Enable IPv6 for Docker daemon by default
+  template:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+  tags:
+    - docker
+
+- name: Ensure Docker service is enabled
   service:
     name: docker
-    state: started
     enabled: yes
   tags:
     - docker
