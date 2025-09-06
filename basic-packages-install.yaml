@@ -88,10 +88,9 @@
       - tree
       - ncdu
       - plocate
-      - neofetch
+      - fastfetch
       - python3-passlib
       - telnet
-      - exa
       - cron
       - bmon
       - jq
