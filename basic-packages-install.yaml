@@ -98,6 +98,7 @@
       - xsel
       - unzip
       - git
+      - gnupg
     state: latest
     autoclean: yes
     clean: yes
